@@ -72,7 +72,7 @@ plt.show()
 ```
 
 
-![png](output_2_0.png)
+![png](writeup_images/output_2_0.png)
 
 
 ### Rubric point 1
@@ -116,7 +116,7 @@ undistort_and_compare(img)
 ```
 
 
-![png](output_4_0.png)
+![png](writeup_images/output_4_0.png)
 
 
 ### Rubric point 2
@@ -132,7 +132,7 @@ undistort_and_compare(img)
 ```
 
 
-![png](output_6_0.png)
+![png](writeup_images/output_6_0.png)
 
 
 ### Color and Thresholds
@@ -271,15 +271,15 @@ sobel_thresholds(img)
 ```
 
 
-![png](output_9_0.png)
+![png](writeup_images/output_9_0.png)
 
 
 
-![png](output_9_1.png)
+![png](writeup_images/output_9_1.png)
 
 
 
-![png](output_9_2.png)
+![png](writeup_images/output_9_2.png)
 
 
 ### Rubric point 3
@@ -334,7 +334,7 @@ plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
 ```
 
 
-![png](output_11_0.png)
+![png](writeup_images/output_11_0.png)
 
 
 ### Perspective Transform
@@ -407,7 +407,7 @@ display_unwarped(img)
 ```
 
 
-![png](output_14_0.png)
+![png](writeup_images/output_14_0.png)
 
 
 Let's apply perspective transformation on thresolded image.
@@ -419,7 +419,7 @@ display_unwarped(undistort_and_threshold(img), cmap='gray')
 ```
 
 
-![png](output_16_0.png)
+![png](writeup_images/output_16_0.png)
 
 
 Now let's see how transformation looks like on test images
@@ -433,35 +433,35 @@ for fname in images:
 ```
 
 
-![png](output_18_0.png)
+![png](writeup_images/output_18_0.png)
 
 
 
-![png](output_18_1.png)
+![png](writeup_images/output_18_1.png)
 
 
 
-![png](output_18_2.png)
+![png](writeup_images/output_18_2.png)
 
 
 
-![png](output_18_3.png)
+![png](writeup_images/output_18_3.png)
 
 
 
-![png](output_18_4.png)
+![png](writeup_images/output_18_4.png)
 
 
 
-![png](output_18_5.png)
+![png](writeup_images/output_18_5.png)
 
 
 
-![png](output_18_6.png)
+![png](writeup_images/output_18_6.png)
 
 
 
-![png](output_18_7.png)
+![png](writeup_images/output_18_7.png)
 
 
 ### Finding the lanes
@@ -599,11 +599,11 @@ left_fit, right_fit = sliding_window_poly_fit(binary_warped)
 ```
 
 
-![png](output_21_0.png)
+![png](writeup_images/output_21_0.png)
 
 
 
-![png](output_21_1.png)
+![png](writeup_images/output_21_1.png)
 
 
 The green shaded area in the above image shows where we searched for the lines. So, once we know where the lines are in one frame of video, you can do a highly targeted search for them in the next frame. This is equivalent to using a customized region of interest for each frame of video, and should help us track the lanes through sharp curves and tricky conditions. If we lose track of the lines, we go back to your sliding windows search or other method to rediscover them.
@@ -743,7 +743,7 @@ plt.show()
 ```
 
 
-![png](output_29_0.png)
+![png](writeup_images/output_29_0.png)
 
 
 ### Pipeline (video)
