@@ -1,5 +1,5 @@
 
-# Advanced Lane Finding
+# Advanced Lane Finding (writeup + code)
 
 ## Goal
 Write a software pipeline to identify the lane boundaries in a video from a front-facing camera on a car. Rubric points (https://review.udacity.com/#!/rubrics/571/view) are also covered in this ipython notebook.
