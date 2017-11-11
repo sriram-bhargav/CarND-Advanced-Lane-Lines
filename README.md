@@ -4,80 +4,32 @@
 ## Goal
 Write a software pipeline to identify the lane boundaries in a video from a front-facing camera on a car. Rubric points (https://review.udacity.com/#!/rubrics/571/view) are also covered in this ipython notebook.
 
-## Pipeline
-Steps involved in the pipeline:
+The goals / steps of this project are the following:
 
-    1. Compute the camera calibration matrix and distortion coefficients given a set of chessboard images.
-    2. Apply a distortion correction to raw images.
-    3. Use color transforms, gradients, etc., to create a thresholded binary image.
-    4. Apply a perspective transform to rectify binary image ("birds-eye view").
-    5. Detect lane pixels and fit to find the lane boundary.
-    6. Determine the curvature of the lane and vehicle position with respect to center.
-    7. Warp the detected lane boundaries back onto the original image.
-    8. Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
+* Compute the camera calibration matrix and distortion coefficients given a set of chessboard images.
+* Apply a distortion correction to raw images.
+* Use color transforms, gradients, etc., to create a thresholded binary image.
+* Apply a perspective transform to rectify binary image ("birds-eye view").
+* Detect lane pixels and fit to find the lane boundary.
+* Determine the curvature of the lane and vehicle position with respect to center.
+* Warp the detected lane boundaries back onto the original image.
+* Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
+
+## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
+
+### Here I will consider the rubric points individually and describe how I addressed each point in my implementation. 
+
+### Writeup / README
+
+#### 1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  [Here](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md) is a template writeup for this project you can use as a guide and a starting point.  
+
+You're reading it!
 
 ### Camera Calibration
 
+#### 1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
 
-```python
-import numpy as np
-import cv2
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-%matplotlib inline
-import glob
-
-# Prepare object points
-nx = 9
-ny = 6
-
-# Arrays to store objects points and image points from all the images.
-objpoints = []  # 3D points in real world space
-imgpoints = []  # 2D points in image plane
-
-# Prepare object points, like (0,0,0), (1,0,0), (2,0,0), ..., (8,5,0)
-objp = np.zeros((nx*ny, 3), np.float32)
-objp[:,:2] = np.mgrid[0:nx,0:ny].T.reshape(-1,2)
-
-# Read in and make a list of calibration images.
-images = glob.glob('camera_cal/calibration*.jpg')
-
-# Subplots initialization (https://matplotlib.org/examples/pylab_examples/subplots_demo.html).
-f, axarr2D = plt.subplots(6, 3, figsize=(15,15))
-f.subplots_adjust(hspace = .2, wspace=.001)
-axarr1D = axarr2D.ravel()
-
-successfully_calibrated = 0
-for fname in images:
-    # Read each image
-    img = mpimg.imread(fname)
-
-    # Convert to grayscale
-    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-
-    # Find the chessboard corners
-    ret, corners = cv2.findChessboardCorners(gray, (nx, ny), None)
-
-    # If found, draw corners
-    if ret == True:
-        imgpoints.append(corners)
-        objpoints.append(objp)
-        # Draw and display the corners
-        cv2.drawChessboardCorners(img, (nx, ny), corners, ret)
-        axarr1D[successfully_calibrated].imshow(img)
-        axarr1D[successfully_calibrated].axis('off')
-        successfully_calibrated =  successfully_calibrated + 1
-
-plt.show()
-```
-
-
-![png](writeup_images/output_2_0.png)
-
-
-### Rubric point 1
-
-#### Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
+The code for this step is contained in the first, second code cell of the IPython notebook.
 
 I used chessboard calibration images (of size 9x6) provided as part of project resources to compute camera matrix and distortion coefficients.
 Steps involved:
@@ -87,189 +39,32 @@ Steps involved:
         3. If successful, the corners are saved in imgpoints list.
         4. As we know the size of chessboard, objpoints list is easy to construct by generating sequence ((0,0,0), (1,0,0), (2,0,0), ..., (8,5,0)) for each image.
         
-I then used the output objpoints and imgpoints to compute the camera calibration and distortion coefficients using the cv2.calibrateCamera() function. I applied this distortion correction to the test image using the cv2.undistort() function (Note: undistorted image is displayed belowe the code).
-
-
-```python
-# Read a test chessboard image
-img = mpimg.imread('camera_cal/calibration3.jpg')
-
-# Use image points and object points computed from chessboard calibration images
-# to compute the calibration and later undistortion.
-ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, img.shape[1::-1], None, None)
-
-# Helper function to undistort images.
-def undistort(img):
-    return cv2.undistort(img, mtx, dist, None, mtx)
-
-# Helper function to undistort the original image and compare it with original side-by-side.
-def undistort_and_compare(img):
-    f, (ax1, ax2) = plt.subplots(1, 2, figsize=(24, 9))
-    f.tight_layout()
-    ax1.imshow(img)
-    ax1.set_title('Original Image', fontsize=50)
-    ax2.imshow(undistort(img))
-    ax2.set_title('Undistorted Image', fontsize=50)
-    plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
-
-undistort_and_compare(img)
-```
-
+I then used the output objpoints and imgpoints to compute the camera calibration and distortion coefficients using the cv2.calibrateCamera() function. I applied this distortion correction to the test image using the cv2.undistort() function.
 
 ![png](writeup_images/output_4_0.png)
 
 
-### Rubric point 2
 
-#### Provide an example of a distortion-corrected image.
-Note the change in white car's location :)
+### Pipeline (single images)
 
+#### 1. Provide an example of a distortion-corrected image.
 
-```python
-# Read a test image
-img = mpimg.imread('test_images/test4.jpg')
-undistort_and_compare(img)
-```
-
+undistort() function is code cell 2 is applied on test image. Image below depicts pre and post distortion correction:
 
 ![png](writeup_images/output_6_0.png)
 
-
-### Color and Thresholds
-
-Let's see which color channels and thresholding methods are useful for identifying lanes (white and yellow color).
+Note the change in white car's location :)
 
 
-```python
-# Function that applies Sobel x or y, then takes an absolute value
-# and applies a threshold.
-def abs_sobel_thresh(img, orient='x', sobel_kernel=3, thresh=(0, 255)):
-    # Convert to grayscale
-    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    # Apply x or y gradient with the OpenCV Sobel() function
-    # and take the absolute value
-    if orient == 'x':
-        abs_sobel = np.absolute(cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=sobel_kernel))
-    if orient == 'y':
-        abs_sobel = np.absolute(cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=sobel_kernel))
-    # Rescale back to 8 bit integer
-    scaled_sobel = np.uint8(255*abs_sobel/np.max(abs_sobel))
-    # Create a copy and apply the threshold
-    binary_output = np.zeros_like(scaled_sobel)
-    # Here I'm using inclusive (>=, <=) thresholds, but exclusive is ok too
-    binary_output[(scaled_sobel >= thresh[0]) & (scaled_sobel <= thresh[1])] = 1
+### Rubric point 3
 
-    # Return the result
-    return binary_output
+#### Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image. Provide an example of a binary image result.
 
-# Function that applies Sobel x and y, then computes the magnitude of the gradient
-# and applies a threshold
-def mag_thresh(img, sobel_kernel=3, mag_thresh=(0, 255)):
-    # Convert to grayscale
-    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    # Take both Sobel x and y gradients
-    sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=sobel_kernel)
-    sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=sobel_kernel)
-    # Calculate the gradient magnitude
-    gradmag = np.sqrt(sobelx**2 + sobely**2)
-    # Rescale to 8 bit
-    scale_factor = np.max(gradmag)/255 
-    gradmag = (gradmag/scale_factor).astype(np.uint8) 
-    # Create a binary image of ones where threshold is met, zeros otherwise
-    binary_output = np.zeros_like(gradmag)
-    binary_output[(gradmag >= mag_thresh[0]) & (gradmag <= mag_thresh[1])] = 1
+As you can see below "Saturation" (higher threshold) and "Hue" (lower threshold) channel of HSV image detects lane lines better than others. Also, absolute sobel threshold X method seem to identify lanes better than other thresholding methods.
 
-    # Return the binary image
-    return binary_output
+Together with HSV color transform (H and S channel) and Sobel threshold X gradient, we obtain thresholded binary image.
 
-# Function to threshold an image for a given range and Sobel kernel
-def dir_threshold(img, sobel_kernel=3, thresh=(0, np.pi/2)):
-    # Grayscale
-    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    # Calculate the x and y gradients
-    sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=sobel_kernel)
-    sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=sobel_kernel)
-    # Take the absolute value of the gradient direction, 
-    # apply a threshold, and create a binary image result
-    absgraddir = np.arctan2(np.absolute(sobely), np.absolute(sobelx))
-    binary_output =  np.zeros_like(absgraddir)
-    binary_output[(absgraddir >= thresh[0]) & (absgraddir <= thresh[1])] = 1
-
-    # Return the binary image
-    return binary_output
-```
-
-
-```python
-# test4.jpg is good candidate to check which color channel works better than other in detecting lane lines
-img = mpimg.imread('test_images/test4.jpg')
-plt.imshow(img)
-plt.show()
-
-def display_channels(img):
-    R = img[:,:,0]
-    G = img[:,:,1]
-    B = img[:,:,2]
-    HLS = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
-    H1 = HLS[:,:,0]
-    L = HLS[:,:,1]
-    S1 = HLS[:,:,2]
-    HSV = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
-    H2 = HSV[:,:,0]
-    S2 = HSV[:,:,1]
-    V = HSV[:,:,2]
-    fn, axes2D = plt.subplots(3, 3, figsize=(12, 12))
-    fn.tight_layout()
-
-    axes2D[0][0].set_title('Red Channel (RGB)', fontsize=10)
-    axes2D[0][0].imshow(R, cmap='gray')
-    axes2D[0][1].imshow(G, cmap='gray')
-    axes2D[0][1].set_title('Green Channel (RGB)', fontsize=10)
-    axes2D[0][2].imshow(B, cmap='gray')
-    axes2D[0][2].set_title('Blue Channel (RGB)', fontsize=10)
-    axes2D[1][0].imshow(H1, cmap='gray')
-    axes2D[1][0].set_title('Hue Channel (HLS)', fontsize=10)
-    axes2D[1][1].imshow(L, cmap='gray')
-    axes2D[1][1].set_title('Lighting Channel (HLS)', fontsize=10)
-    axes2D[1][2].imshow(S1, cmap='gray')
-    axes2D[1][2].set_title('Saturation Channel (HLS)', fontsize=10)
-    axes2D[2][0].imshow(H2, cmap='gray')
-    axes2D[2][0].set_title('Hue Channel (HSV)', fontsize=10)
-    axes2D[2][1].imshow(S2, cmap='gray')
-    axes2D[2][1].set_title('Saturation Channel (HSV)', fontsize=10)
-    axes2D[2][2].imshow(V, cmap='gray')
-    axes2D[2][2].set_title('Value Channel (HSV)', fontsize=10)
-    plt.show()
-
-display_channels(img)
-
-# Choose a Sobel kernel size
-ksize = 3
-
-# Lets see how different thresholding methods work on the test image.
-def sobel_thresholds(img):
-    fn, axes2D = plt.subplots(2, 2, figsize=(12, 12))
-    fn.tight_layout()
-
-    axes2D[0][0].set_title('Absolute sobel x', fontsize=10)
-    gradx = abs_sobel_thresh(img, orient='x', sobel_kernel=ksize, thresh=(50, 200))
-    axes2D[0][0].imshow(gradx, cmap='gray')
-    
-    axes2D[0][1].set_title('Absolute sobel y', fontsize=10)
-    grady = abs_sobel_thresh(img, orient='y', sobel_kernel=ksize, thresh=(50, 150))
-    axes2D[0][1].imshow(grady, cmap='gray')
-
-    axes2D[1][0].set_title('Magnitude threshold', fontsize=10)
-    mag_binary = mag_thresh(img, sobel_kernel=ksize, mag_thresh=(50, 150))
-    axes2D[1][0].imshow(mag_binary, cmap='gray')
-
-    axes2D[1][1].set_title('Directional threshold', fontsize=10)
-    dir_binary = dir_threshold(img, sobel_kernel=ksize, thresh=(0.02, 0.3))
-    axes2D[1][1].imshow(dir_binary, cmap='gray')
-
-sobel_thresholds(img)
-```
-
+Directional and Magnitude thresholds has very minimal to no effect on thresholded binary image.
 
 ![png](writeup_images/output_9_0.png)
 
@@ -280,58 +75,6 @@ sobel_thresholds(img)
 
 
 ![png](writeup_images/output_9_2.png)
-
-
-### Rubric point 3
-
-#### Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image. Provide an example of a binary image result.
-
-As you can see above, "Saturation" (higher threshold) and "Hue" (lower threshold) channel of HSV image detects lane lines better than others. Also, absolute sobel threshold X method seem to identify lanes better than other thresholding methods.
-
-Together with HSV color transform (H and S channel) and Sobel threshold X gradient, we obtain thresholded binary image.
-
-Directional and Magnitude thresholds has very minimal to no effect on thresholded binary image.
-
-
-
-```python
-def undistort_and_threshold(img, h_thresh=(15, 100), s_thresh=(100, 255), sx_thresh=(50, 150)):
-    # Undistort the image
-    img = np.copy(undistort(img))
-    
-    sx_binary = abs_sobel_thresh(img, orient='x', sobel_kernel=3, thresh=sx_thresh)
-    
-    # Convert to HLS color space
-    hls = cv2.cvtColor(img, cv2.COLOR_RGB2HLS).astype(np.float)
-    h_channel = hls[:,:,0]
-    s_channel = hls[:,:,2]
-
-    # Threshold color channel (hue and saturation)
-    s_binary = np.zeros_like(s_channel)
-    s_binary[(s_channel >= s_thresh[0]) & (s_channel <= s_thresh[1])] = 1
-    
-    h_binary = np.zeros_like(h_channel)
-    h_binary[(h_channel >= h_thresh[0]) & (h_channel <= h_thresh[1])] = 1
-
-    # Combine the two binary thresholds
-    combined_binary = np.zeros_like(sx_binary)
-    combined_binary[((h_binary == 1) & (s_binary == 1)) | (sx_binary == 1)] = 1
-    return combined_binary
-
-img = mpimg.imread('test_images/test4.jpg')
-result = undistort_and_threshold(img)
-
-# Plot the result
-f, (ax1, ax2) = plt.subplots(1, 2, figsize=(24, 9))
-f.tight_layout()
-
-ax1.imshow(img)
-ax1.set_title('Original Image', fontsize=40)
-
-ax2.imshow(result, cmap='gray')
-ax2.set_title('Thresholded Binary Image', fontsize=40)
-plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
-```
 
 
 ![png](writeup_images/output_11_0.png)
