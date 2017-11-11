@@ -153,7 +153,7 @@ left_fitx, right_fitx are polyfits of left and right lanes respectively. xm_per_
 
 process_image() in the notebook takes care of detecting lane lines and displaying on top of the image.
 
-![png](writeup_images/output_29_0.png)
+![png](writeup_images/output_29_1.png)
 
 
 ### Pipeline (video)
