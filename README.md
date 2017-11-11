@@ -83,22 +83,14 @@ perspective_transform() in code cell 7 does perspective transformation.
 
 When we apply a perspective transform, we need to choose four source points. As we know that camera position is fixed and road is flat most of the times, we can do fixed perspective transformation using four hard-coded source points.
 
-We have used getPerspectiveTransform() and warpPerspective() to compute perspective transform and apply on image using following src and dst polygons.
+We have used getPerspectiveTransform() and warpPerspective() to compute perspective transform and apply on image using following Source and Destination polygons.
 
-|  src (X, Y) |        
-|------|------|       
-|  170 | 720  |        
-|  550 | 460  |        
-|  745 | 460  |        
-| 1200 | 720  |        
-
-
-|  dst (X, Y) |
-|------|------| 
-|  320 |   0  |
-|  320 | 720  |
-|  960 |   0  |
-|  960 | 720  |
+| Source        | Destination   | 
+|:-------------:|:-------------:| 
+| 170, 720      | 320, 0        | 
+| 550, 460      | 320, 720      |
+| 745, 460      | 960, 0        |
+| 1200, 720     | 960, 720      |
 
 
 ![png](writeup_images/output_14_0.png)
